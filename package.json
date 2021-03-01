@@ -4,7 +4,7 @@
   "description": "Architecture repository",
   "main": "dist/app.js",
   "scripts": {
-    "start": "tsc && node dist/src/index.js",
+    "start": "tsc && node dist/index.js",
     "test": "npx jest --watchAll"
   },
   "author": "",
@@ -30,9 +30,6 @@
   },
   "jest": {
     "preset": "ts-jest",
-    "roots": [
-      "<rootDir>/src/"
-    ],
     "setupFilesAfterEnv": [
       "@relmify/jest-fp-ts"
     ]
