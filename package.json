@@ -29,6 +29,9 @@
     "validator": "^13.5.2"
   },
   "jest": {
+    "testMatch": [
+      "**/?(*.)+(spec|test).[jt]s?(x)"
+    ],
     "preset": "ts-jest",
     "setupFilesAfterEnv": [
       "@relmify/jest-fp-ts"
