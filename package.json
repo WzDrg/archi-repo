@@ -22,10 +22,13 @@
     "typescript": "^3.3.3"
   },
   "dependencies": {
+    "@types/js-yaml": "^4.0.0",
     "apollo-server": "^2.21.0",
     "express": "^4.16.4",
     "fp-ts": "^2.9.5",
     "graphql": "^15.5.0",
+    "js-yaml": "^4.0.0",
+    "uuid": "^8.3.2",
     "validator": "^13.5.2"
   },
   "jest": {

@@ -1,3 +1,5 @@
-export enum Error {
-    FileReadError
+export enum ArchiRepoError {
+    FileReadError,
+    NotImplemented,
+    StoredSnapshotNotFound
 }
