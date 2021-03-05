@@ -1,3 +1,16 @@
+export type SnapshotId = string;
+
+export interface SnapshotSummary {
+    id: SnapshotId;
+    name: string;
+    timestamp: Date;
+    enabled: boolean;
+}
+export interface StoredSnapshot extends Snapshot {
+    id: SnapshotId;
+    enabled: boolean;
+}
+
 export interface Snapshot {
     name: string,
     description: string,

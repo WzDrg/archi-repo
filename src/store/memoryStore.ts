@@ -1,32 +1,39 @@
-import { left, right, TaskEither, map, fromOption } from "fp-ts/TaskEither";
-import { Snapshot } from "../core";
+import { right, TaskEither, map, fromOption } from "fp-ts/TaskEither";
 import { ArchiRepoError } from "../core/error";
 import { SnapshotStorage } from "../core/proxy";
-import { StoredSnapshot, StoredSnapshotId } from "../core/snapshots/storedSnapshot";
 import { v4 as uuidv4 } from "uuid";
-import { findFirst, findIndex } from "fp-ts/Array";
+import { findFirst, findIndex, filter } from "fp-ts/Array";
 import { map as mapOption, Option } from "fp-ts/Option";
 import { pipe } from "fp-ts/pipeable";
+import { Snapshot, SnapshotId, SnapshotSummary, StoredSnapshot } from "../core/snapshots/snapshot";
 
 const _getSnapshotsBefore = (snapshots: StoredSnapshot[]) =>
     (timestamp: Date): TaskEither<ArchiRepoError, StoredSnapshot[]> =>
-        left(ArchiRepoError.NotImplemented);
+        pipe(
+            snapshots,
+            filter(snapshot => snapshot.timestamp.getTime() <= timestamp.getTime()),
+            right
+        );
 
 const _addSnapshot = (snapshots: StoredSnapshot[]) =>
-    (snapshot: Snapshot): TaskEither<ArchiRepoError, StoredSnapshot> => {
+    (snapshot: Snapshot): TaskEither<ArchiRepoError, SnapshotSummary> => {
         const result: StoredSnapshot = {
             id: uuidv4(),
-            name: snapshot.name,
-            timestamp: snapshot.timestamp,
-            snapshot: snapshot,
-            enabled: true
+            enabled: true,
+            ...snapshot
         };
         snapshots.push(result);
-        return right(result);
+        return right({
+            id: result.id,
+            name: result.name,
+            description: result.description,
+            enabled: result.enabled,
+            timestamp: result.timestamp
+        });
     }
 
 const _removeSnapshot = (snapshots: StoredSnapshot[]) =>
-    (id: StoredSnapshotId): TaskEither<ArchiRepoError, StoredSnapshotId> =>
+    (id: SnapshotId): TaskEither<ArchiRepoError, SnapshotId> =>
         pipe(
             right(snapshots),
             map(findIndex((snapshot: StoredSnapshot) => snapshot.id === id)),
@@ -35,13 +42,13 @@ const _removeSnapshot = (snapshots: StoredSnapshot[]) =>
         );
 
 const _findSnapshotIdx = (snapshots: StoredSnapshot[]) =>
-    (id: StoredSnapshotId): Option<number> =>
+    (id: SnapshotId): Option<number> =>
         pipe(
             snapshots,
             findIndex((snapshot: StoredSnapshot) => snapshot.id === id));
 
 const _enableSnapshot = (snapshots: StoredSnapshot[]) =>
-    (id: StoredSnapshotId): TaskEither<ArchiRepoError, StoredSnapshotId> =>
+    (id: SnapshotId): TaskEither<ArchiRepoError, SnapshotId> =>
         pipe(
             _findSnapshotIdx(snapshots)(id),
             fromOption<ArchiRepoError>(() => ArchiRepoError.StoredSnapshotNotFound),
@@ -53,7 +60,7 @@ const _enableSnapshot = (snapshots: StoredSnapshot[]) =>
         );
 
 const _disableSnapshot = (snapshots: StoredSnapshot[]) =>
-    (id: StoredSnapshotId): TaskEither<ArchiRepoError, StoredSnapshotId> =>
+    (id: SnapshotId): TaskEither<ArchiRepoError, SnapshotId> =>
         pipe(
             _findSnapshotIdx(snapshots)(id),
             fromOption<ArchiRepoError>(() => ArchiRepoError.StoredSnapshotNotFound),
@@ -65,7 +72,7 @@ const _disableSnapshot = (snapshots: StoredSnapshot[]) =>
         );
 
 const _getSnapshot = (snapshots: StoredSnapshot[]) =>
-    (id: StoredSnapshotId): TaskEither<ArchiRepoError, Option<StoredSnapshot>> =>
+    (id: SnapshotId): TaskEither<ArchiRepoError, Option<StoredSnapshot>> =>
         pipe(
             right(snapshots),
             map(findFirst(snapshot => snapshot.id === id))

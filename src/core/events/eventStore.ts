@@ -1,14 +1,14 @@
 import { filter } from "fp-ts/Array";
-import { IOEither, right, map } from "fp-ts/IOEither";
+import { TaskEither, right, map } from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/pipeable";
 import { ArchiRepoError } from "../error";
 import { AggregateEvent, AggregateId, AggregateType } from "./event";
 
 export interface EventStore {
-    getAllEvents: () => IOEither<ArchiRepoError, AggregateEvent<any>[]>;
-    getEventsById: <T extends AggregateType>(id: AggregateId<T>) => IOEither<ArchiRepoError, AggregateEvent<T>[]>;
-    getEventsBefore: (timestamp: Date) => IOEither<ArchiRepoError, AggregateEvent<any>[]>;
-    storeEvents: (events: AggregateEvent<any>[]) => IOEither<ArchiRepoError, AggregateEvent<any>[]>;
+    getAllEvents: () => TaskEither<ArchiRepoError, AggregateEvent<any>[]>;
+    getEventsById: <T extends AggregateType>(id: AggregateId<T>) => TaskEither<ArchiRepoError, AggregateEvent<T>[]>;
+    getEventsBefore: (timestamp: Date) => TaskEither<ArchiRepoError, AggregateEvent<any>[]>;
+    storeEvents: (events: AggregateEvent<any>[]) => TaskEither<ArchiRepoError, AggregateEvent<any>[]>;
 }
 
 const _getAllEvents = (events: AggregateEvent<any>[]) =>

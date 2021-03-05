@@ -5,21 +5,26 @@ import { CoreServices } from "../../core/coreServices";
 import { createServer } from "../server";
 
 describe("Query Snapshot", () => {
-    const mergeSnapshot = jest.fn();
-    const buildSnapshot = jest.fn();
+    let newSnapshotAt = jest.fn();
     let client: ApolloServerTestClient;
 
     beforeEach(() => {
         const coreServices: CoreServices = {
-            insertSnapshot: mergeSnapshot,
-            createSnapshotAt: buildSnapshot
+            saveSnapshot: jest.fn(),
+            newSnapshotAt: newSnapshotAt,
+            enableSnapshot: jest.fn(),
+            disableSnapshot: jest.fn(),
+            getAllSnapshots: jest.fn(),
+            getSnapshot: jest.fn(),
+            removeSnapshot: jest.fn(),
+            updateSnapshot: jest.fn()
         }
         const server = createServer(coreServices);
         client = createTestClient(server);
     });
 
     it("should retrieve a simple snapshot", async () => {
-        buildSnapshot.mockReturnValueOnce(right({
+        newSnapshotAt.mockReturnValueOnce(right({
             timestamp: new Date(),
             name: "snapshot",
             description: "Description of the snapshot",

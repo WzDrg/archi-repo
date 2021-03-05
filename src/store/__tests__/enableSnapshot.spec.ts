@@ -2,20 +2,18 @@ import { pipe } from "fp-ts/lib/pipeable";
 import { some } from "fp-ts/Option";
 import { chain, map } from "fp-ts/lib/TaskEither";
 import { memoryStore } from "../memoryStore";
-import { createSnapshot } from "./snapshotFixture";
 
 describe("Enable and disable snapshots", () => {
     it("should enable newly added snapshot", async () => {
         const storage = memoryStore();
-        const result = await storage.addSnapshot(createSnapshot())();
+        const result = await storage.addSnapshot("snapshot", "...", new Date(), "...")();
         expect(result).toEqualRight(expect.objectContaining({ enabled: true }));
     });
 
     it("should disable an existing snapshot", async () => {
         const storage = memoryStore();
         const result = await pipe(
-            createSnapshot(),
-            storage.addSnapshot,
+            storage.addSnapshot("snapshot", "description", new Date(), "..."),
             map(snapshot => snapshot.id),
             chain(storage.disableSnapshot),
             chain(storage.getSnapshot)
@@ -26,8 +24,7 @@ describe("Enable and disable snapshots", () => {
     it("should enable a disabled snapshot", async () => {
         const storage = memoryStore();
         const result = await pipe(
-            createSnapshot(),
-            storage.addSnapshot,
+            storage.addSnapshot("snapshot", "...", new Date(), "..."),
             map(snapshot => snapshot.id),
             chain(storage.disableSnapshot),
             chain(storage.enableSnapshot),

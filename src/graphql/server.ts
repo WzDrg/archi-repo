@@ -6,10 +6,9 @@ import { Snapshot } from "../core";
 import { pipe } from "fp-ts/lib/pipeable";
 import { getOrElseW } from "fp-ts/Either";
 
-const resolveSnapshot = (coreServices: CoreServices): Error | Snapshot =>
+const resolveSnapshot = async (coreServices: CoreServices): Promise<Error | Snapshot> =>
     pipe(
-        new Date(),
-        timestamp => coreServices.createSnapshotAt(timestamp, "name", "description")(),
+        await coreServices.newSnapshotAt(new Date())(),
         getOrElseW(_ => ({ name: "error", message: "" }))
     );
 

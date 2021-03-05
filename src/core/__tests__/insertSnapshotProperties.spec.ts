@@ -1,18 +1,30 @@
 import * as fc from "fast-check";
-import { coreServices, memoryEventStore } from "../index";
+import { pipe } from "fp-ts/pipeable";
+import { chain, map } from "fp-ts/TaskEither";
+import { memoryStore } from "../../store/memoryStore";
+import { CoreServices } from "../coreServices";
+import { coreServices } from "../index";
 import { snapshotArbitrary } from "./snapshotArbitrary";
 
 describe("Merge snapshot properties", () => {
 
+    let services: CoreServices;
+
+    beforeEach(() => {
+        services = coreServices(memoryStore());
+    });
+
     it("should generate an event for each item in the snapshot", () => fc.assert(
-        fc.property(
-            snapshotArbitrary, (snapshot) => {
-                let services = coreServices(memoryEventStore());
-                let events = services.insertSnapshot(snapshot)();
-                expect(events).toBeRight();
-                let result = services.createSnapshotAt(snapshot.timestamp, snapshot.name, snapshot.description)();
+        fc.asyncProperty(
+            snapshotArbitrary, async (snapshot) => {
+                let result = await pipe(
+                    snapshot,
+                    services.saveSnapshot,
+                    map(summary => summary.id),
+                    chain(services.getSnapshot)
+                )();
                 expect(result).toBeRight();
-                expect(result).toEqualRight(snapshot);
+                expect(result).toEqualRight(expect.objectContaining(snapshot));
             }
         ))
     );
